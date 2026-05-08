@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Java Theme Changer — Web Version</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.4s, color 0.4s;
+      padding: 2rem;
+    }
+
+    /* ── Theme Variables ── */
+    body.light {
+      --bg: #f0f4f8;
+      --surface: #ffffff;
+      --card: #f8fafc;
+      --text: #111827;
+      --muted: #6b7280;
+      --border: #e5e7eb;
+      --accent: #2563eb;
+      --accent-hover: #1d4ed8;
+      --btn-text: #ffffff;
+      --tag-bg: #dbeafe;
+      --tag-text: #1e40af;
+      --success: #16a34a;
+    }
+
+    body.dark {
+      --bg: #111827;
+      --surface: #1f2937;
+      --card: #1a2332;
+      --text: #f9fafb;
+      --muted: #9ca3af;
+      --border: #374151;
+      --accent: #60a5fa;
+      --accent-hover: #3b82f6;
+      --btn-text: #ffffff;
+      --tag-bg: #1e3a5f;
+      --tag-text: #93c5fd;
+      --success: #4ade80;
+    }
+
+    body.custom {
+      --bg: #fdf6e3;
+      --surface: #fffdf4;
+      --card: #fff9ed;
+      --text: #3d2b1f;
+      --muted: #7a5c4a;
+      --border: #e8d5b7;
+      --accent: #b45309;
+      --accent-hover: #92400e;
+      --btn-text: #ffffff;
+      --tag-bg: #fde8c0;
+      --tag-text: #92400e;
+      --success: #15803d;
+    }
+
+    /* ── Container ── */
+    .container {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 2rem;
+      width: 100%;
+      max-width: 480px;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.08);
+      transition: background 0.4s, border-color 0.4s, box-shadow 0.4s;
+    }
+
+    /* ── Header ── */
+    .header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 1.75rem;
+    }
+
+    .header h1 {
+      font-size: 20px;
+      font-weight: 600;
+      color: var(--text);
+      transition: color 0.4s;
+    }
+
+    .header p {
+      font-size: 13px;
+      color: var(--muted);
+      margin-top: 3px;
+      transition: color 0.4s;
+    }
+
+    .badge {
+      font-size: 12px;
+      font-weight: 600;
+      padding: 5px 12px;
+      border-radius: 20px;
+      background: var(--tag-bg);
+      color: var(--tag-text);
+      transition: background 0.4s, color 0.4s;
+      white-space: nowrap;
+    }
+
+    /* ── Theme Buttons ── */
+    .theme-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      margin-bottom: 1.5rem;
+    }
+
+    .theme-btn {
+      border: 2px solid var(--border);
+      border-radius: 14px;
+      padding: 14px 8px 12px;
+      cursor: pointer;
+      background: var(--card);
+      transition: all 0.3s;
+      text-align: center;
+      position: relative;
+    }
+
+    .theme-btn:hover { transform: translateY(-3px); border-color: var(--accent); }
+    .theme-btn.active { border-color: var(--accent); }
+
+    .swatch {
+      width: 38px;
+      height: 38px;
+      border-radius: 50%;
+      margin: 0 auto 9px;
+      border: 2px solid rgba(0,0,0,0.08);
+      transition: transform 0.2s;
+    }
+
+    .theme-btn:hover .swatch { transform: scale(1.1); }
+
+    .theme-btn .name {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text);
+      display: block;
+      transition: color 0.4s;
+    }
+
+    .theme-btn .desc {
+      font-size: 11px;
+      color: var(--muted);
+      display: block;
+      margin-top: 2px;
+      transition: color 0.4s;
+    }
+
+    .check {
+      position: absolute;
+      top: 8px; right: 9px;
+      width: 18px; height: 18px;
+      background: var(--accent);
+      border-radius: 50%;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+      font-size: 11px;
+      font-weight: 700;
+    }
+
+    .theme-btn.active .check { display: flex; }
+
+    /* ── Preview ── */
+    .section {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 1.1rem 1.2rem;
+      margin-bottom: 1rem;
+      transition: background 0.4s, border-color 0.4s;
+    }
+
+    .section-label {
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--muted);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      margin-bottom: 12px;
+      transition: color 0.4s;
+    }
+
+    .mock-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 11px 13px;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      transition: background 0.4s, border-color 0.4s;
+    }
+
+    .avatar {
+      width: 38px; height: 38px;
+      border-radius: 50%;
+      background: var(--tag-bg);
+      color: var(--tag-text);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 13px; font-weight: 600;
+      flex-shrink: 0;
+      transition: background 0.4s, color 0.4s;
+    }
+
+    .mock-name { font-size: 14px; font-weight: 600; color: var(--text); transition: color 0.4s; }
+    .mock-role { font-size: 12px; color: var(--muted); transition: color 0.4s; }
+
+    .mock-actions { display: flex; gap: 8px; margin-top: 10px; }
+
+    .mock-primary {
+      flex: 1; padding: 9px;
+      background: var(--accent); color: var(--btn-text);
+      border: none; border-radius: 9px;
+      font-size: 13px; font-weight: 600; cursor: pointer;
+      transition: background 0.3s, transform 0.1s;
+    }
+    .mock-primary:hover { background: var(--accent-hover); transform: scale(0.98); }
+
+    .mock-outline {
+      flex: 1; padding: 9px;
+      background: transparent; color: var(--text);
+      border: 1.5px solid var(--border); border-radius: 9px;
+      font-size: 13px; cursor: pointer;
+      transition: all 0.3s;
+    }
+    .mock-outline:hover { border-color: var(--accent); color: var(--accent); }
+
+    /* ── Color Chips ── */
+    .chip-row { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 10px; }
+    .chip {
+      display: flex; align-items: center; gap: 6px;
+      font-size: 12px; color: var(--muted);
+      transition: color 0.4s;
+    }
+    .chip-dot {
+      width: 14px; height: 14px; border-radius: 4px;
+      border: 1px solid rgba(0,0,0,0.1);
+      transition: background 0.4s;
+    }
+
+    /* ── Toast ── */
+    .toast {
+      display: flex; align-items: center; gap: 8px;
+      font-size: 13px; color: var(--muted);
+      margin-top: 12px; height: 20px;
+      opacity: 0; transform: translateY(4px);
+      transition: opacity 0.3s, transform 0.3s, color 0.4s;
+    }
+    .toast.show { opacity: 1; transform: translateY(0); }
+    .toast-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--success); flex-shrink: 0; }
+  </style>
+</head>
+<body class="light">
+
+  <div class="container">
+
+    <div class="header">
+      <div>
+        <h1>Theme Settings</h1>
+        <p>Preference saved automatically</p>
+      </div>
+      <div class="badge" id="badge">Light</div>
+    </div>
+
+    <!-- Theme Selector -->
+    <div class="theme-grid">
+      <button class="theme-btn active" data-theme="light" onclick="applyTheme('light')">
+        <div class="check">✓</div>
+        <div class="swatch" style="background:#ffffff; border-color:#d1d5db;"></div>
+        <span class="name">Light</span>
+        <span class="desc">Clean &amp; bright</span>
+      </button>
+      <button class="theme-btn" data-theme="dark" onclick="applyTheme('dark')">
+        <div class="check">✓</div>
+        <div class="swatch" style="background:#1e1e1e;"></div>
+        <span class="name">Dark</span>
+        <span class="desc">Easy on eyes</span>
+      </button>
+      <button class="theme-btn" data-theme="custom" onclick="applyTheme('custom')">
+        <div class="check">✓</div>
+        <div class="swatch" style="background:linear-gradient(135deg,#fff8e7,#f5c6a0);"></div>
+        <span class="name">Custom</span>
+        <span class="desc">Warm sepia</span>
+      </button>
+    </div>
+
+    <!-- Live Preview -->
+    <div class="section">
+      <div class="section-label">Live Preview</div>
+      <div class="mock-card">
+        <div class="avatar">JD</div>
+        <div>
+          <div class="mock-name">Jane Doe</div>
+          <div class="mock-role">Product Designer</div>
+        </div>
+      </div>
+      <div class="mock-card">
+        <div class="avatar">MR</div>
+        <div>
+          <div class="mock-name">Mark Rivera</div>
+          <div class="mock-role">Frontend Engineer</div>
+        </div>
+      </div>
+      <div class="mock-actions">
+        <button class="mock-primary">Save Changes</button>
+        <button class="mock-outline">Cancel</button>
+      </div>
+    </div>
+
+    <!-- Color Tokens -->
+    <div class="section">
+      <div class="section-label">Active Color Tokens</div>
+      <div class="chip-row">
+        <div class="chip"><div class="chip-dot" id="d-bg"></div> Background</div>
+        <div class="chip"><div class="chip-dot" id="d-surface"></div> Surface</div>
+        <div class="chip"><div class="chip-dot" id="d-accent"></div> Accent</div>
+        <div class="chip"><div class="chip-dot" id="d-text" style="border-color:#aaa;"></div> Text</div>
+      </div>
+    </div>
+
+    <!-- Toast -->
+    <div class="toast" id="toast">
+      <div class="toast-dot"></div>
+      <span id="toast-msg">Preference saved</span>
+    </div>
+
+  </div>
+
+  <script>
+    const themes = {
+      light:  { name:'Light',  bg:'#f0f4f8', surface:'#ffffff', accent:'#2563eb', text:'#111827' },
+      dark:   { name:'Dark',   bg:'#111827', surface:'#1f2937', accent:'#60a5fa', text:'#f9fafb' },
+      custom: { name:'Custom', bg:'#fdf6e3', surface:'#fffdf4', accent:'#b45309', text:'#3d2b1f' }
+    };
+
+    function applyTheme(key) {
+      const t = themes[key];
+      document.body.className = key;
+      document.getElementById('badge').textContent = t.name;
+      document.getElementById('d-bg').style.background     = t.bg;
+      document.getElementById('d-surface').style.background = t.surface;
+      document.getElementById('d-accent').style.background  = t.accent;
+      document.getElementById('d-text').style.background    = t.text;
+      document.querySelectorAll('.theme-btn').forEach(b => b.classList.remove('active'));
+      document.querySelector(`[data-theme="${key}"]`).classList.add('active');
+      localStorage.setItem('themePreference', key);
+      showToast(`"${t.name}" theme saved`);
+    }
+
+    function showToast(msg) {
+      const el = document.getElementById('toast');
+      document.getElementById('toast-msg').textContent = msg;
+      el.classList.add('show');
+      clearTimeout(window._t);
+      window._t = setTimeout(() => el.classList.remove('show'), 2500);
+    }
+
+    // Load saved preference on startup
+    const saved = localStorage.getItem('themePreference') || 'light';
+    applyTheme(saved);
+  </script>
+</body>
+</html>
